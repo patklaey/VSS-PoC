@@ -1,0 +1,217 @@
+#include "stdafx.h"
+#include "shadow_copy.h"
+
+shadow_copy::shadow_copy(bool _debug)
+{
+	// Set the debug variable
+	this->debug = _debug;
+
+	#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		/* A program using VSS must run in elevated mode */
+		HANDLE hToken;
+		OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &hToken);
+		DWORD infoLen;
+
+		TOKEN_ELEVATION elevation;
+		GetTokenInformation(hToken, TokenElevation, &elevation, sizeof(elevation), &infoLen);
+		if (!elevation.TokenIsElevated)
+		{
+			_tprintf(_T("this program must run in elevated mode\n"));
+		}
+
+
+	#else
+		#error you are using an old version of sdk or not supported operating system
+	#endif
+
+	if (CoInitialize(NULL) != S_OK)
+	{
+		_tprintf(_T("CoInitialize failed!\n"));
+	}
+
+	// Create the shadow copy backup component (VSSBackupComponent)
+	this->result = CreateVssBackupComponents(&(this->pBackup));
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+		_tprintf(_T("Cannot create VSSBackupComponent, operation failed with error: 0x%08lx\n"), this->result);
+
+}
+
+int shadow_copy::initializeSnapshot()
+{
+	// Initialize the backup
+	this->result = this->pBackup->InitializeForBackup();
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Initialize for backup failed with error: = 0x%08lx\n"), this->result);
+		return CANNOT_INITIALIZE_BACKUP;
+	}
+
+	// Set the context, we want an non-persistant backup which involves writers
+	this->result = this->pBackup->SetContext(this->SC_SNAPSHOT_CONTEXT);
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Setting backup context to %i failed with error: 0x%08lx\n"), this->SC_SNAPSHOT_CONTEXT ,this->result);
+		return CANNOT_SET_BACKUP_CONTEXT;
+	}
+
+	// Tell the writers to gather metadata
+	this->result = this->pBackup->GatherWriterMetadata(&(this->pAsync));
+	
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Writers gathering metadata failed with error: 0x%08lx\n"), this->result);
+		return WRITER_GATHERING_METADATA_FAILED;
+	}
+
+	// Wait until all writers collected the metadata
+	this->pAsync->Wait();
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Waiting for writers collecting metadata failed with error: 0x%08lx\n"), this->result);
+		return ASYNC_WAIT_FAILED;
+	}
+
+	VSS_ID tmp_snapshot_set_id;
+
+	// Start the snapshot set
+	this->result = this->pBackup->StartSnapshotSet(&tmp_snapshot_set_id);
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Strating snapshot set failed with error: 0x%08lx\n"), this->result);
+		return CANNOT_START_SNAPSHOT_SET;
+	}
+
+	return SUCCESS;
+}
+
+int shadow_copy::addPartitionToSnapshot(WCHAR* partition)
+{
+	// Create temporary VSS_ID
+	VSS_ID tmp_snapshot_set_id;
+	
+	// Add the partition to the snapshot set
+	this->result = this->pBackup->AddToSnapshotSet(partition, GUID_NULL, &tmp_snapshot_set_id);
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Adding %s to snapshot set failed with error: 0x%08lx\n"), partition, this->result);
+		return CANNOT_ADD_TO_SNAPSHOT_SET;
+	}
+
+	// Add the partition name and the snapshot set id the the hash map
+	this->snapshot_set_ids[partition] = tmp_snapshot_set_id;
+
+	return SUCCESS;
+
+}
+
+int shadow_copy::createSnapshot()
+{
+	// Set the backup state
+	this->result = this->pBackup->SetBackupState(this->SC_SNAPSHOT_SELECT_COMPONENTS, this->SC_SNAPSHOT_BOOTABLE_STATE, this->SC_SNAPSHOT_TYPE);
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Setting backup state failed with error: 0x%08lx\n"), this->result);
+		return CANNOT_SET_SNAPSHOT_STATE;
+	}
+
+	// Tell everyone to prepare for the backup
+	this->result = this->pBackup->PrepareForBackup(&(this->pPrepare));
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Preparing for backup failed with error: 0x%08lx\n"), this->result);
+		return CANNOT_PREPARE_FOR_BACKUP;
+	}
+
+	// Wait for everyone to be ready
+	this->result = this->pPrepare->Wait();
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Waiting for preparing for backup failed with error: 0x%08lx\n"), this->result);
+		return ASYNC_WAIT_FAILED;
+	}
+
+	// And create the shadow copy
+	this->result = this->pBackup->DoSnapshotSet(&(this->pDoShadowCopy));
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Creating shadow copy snapshot failed with error: 0x%08lx\n"), this->result);
+		return CANNOT_CREATE_SNAPSHOT;
+	}
+	
+	// Wait until the shadow copy is created
+	this->result = this->pDoShadowCopy->Wait();
+
+	// Check if the operation succeeded
+	if (this->result != S_OK)
+	{
+		_tprintf(_T("Waiting for shadow copy to finish failed with error: 0x%08lx\n"), this->result);
+		return ASYNC_WAIT_FAILED;
+	}
+
+	// Go thriugh all snapshots and get the according properties
+	for (auto &tmp : this->snapshot_set_ids)
+	{
+		VSS_SNAPSHOT_PROP tmp_snapshot_prop;
+
+		// Get the and set them to the snapshot properties field
+		this->result = this->pBackup->GetSnapshotProperties(tmp.second, &tmp_snapshot_prop);
+		
+		// Check if the operation succeeded
+		if (this->result != S_OK)
+		{
+			_tprintf(_T("Getting snapshot properties failed with error: 0x%08lx\n"), this->result);
+			return CANNOT_GET_SNAPSHOT_PROPERTIES;
+		}
+
+		// Store the snapshot properties according to the partition name
+		this->properties[tmp.first] = tmp_snapshot_prop;
+	}
+
+	return SUCCESS;
+}
+
+wstring shadow_copy::getSnapshotPath(WCHAR* partition)
+{
+	return this->properties.at(partition).m_pwszSnapshotDeviceObject;
+}
+
+
+shadow_copy::~shadow_copy()
+{
+	// Release the shadow copy creation request
+	if (this->pDoShadowCopy != NULL)
+		this->pDoShadowCopy->Release();
+
+	// Release the prepeare for backup request
+	if (this->pPrepare != NULL)
+		this->pPrepare->Release();
+
+	// Release the metadata gathering request
+	if (this->pAsync != NULL)
+		pAsync->Release();
+
+	// Release the main VSS request
+	if (this->pBackup != NULL)
+		this->pBackup->Release();
+}
