@@ -14,7 +14,7 @@ TEMPLATE = app
 
 INCLUDEPATH += "/home/sst-admin/bin/inc/win2003/"
 
-QMAKE_CXXFLAGS += -std=c++11 -w
+QMAKE_CXXFLAGS += -std=c++11 -w -static-libgcc
 
 win32: LIBS += -lvssapi -lole32 -luuid
 
