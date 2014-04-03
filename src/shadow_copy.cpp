@@ -6,31 +6,19 @@ shadow_copy::shadow_copy(bool _debug)
 	// Set the debug variable
 	this->debug = _debug;
 
-	#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		/* A program using VSS must run in elevated mode */
-		HANDLE hToken;
-		OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &hToken);
-		DWORD infoLen;
-
-		TOKEN_ELEVATION elevation;
-		GetTokenInformation(hToken, TokenElevation, &elevation, sizeof(elevation), &infoLen);
-		if (!elevation.TokenIsElevated)
-		{
-			_tprintf(_T("this program must run in elevated mode\n"));
-		}
-
-
-	#else
-		#error you are using an old version of sdk or not supported operating system
-	#endif
-
 	if (CoInitialize(NULL) != S_OK)
 	{
 		_tprintf(_T("CoInitialize failed!\n"));
 	}
 
-	// Create the shadow copy backup component (VSSBackupComponent)
-	this->result = CreateVssBackupComponents(&(this->pBackup));
+        // Load the vssapi library
+        this->vssapiBase = LoadLibrary(L"vssapi.dll");
+
+        // Get the
+        CreateVssBackupComponentsInternal_I = (_CreateVssBackupComponentsInternal)GetProcAddress(this->vssapiBase, "CreateVssBackupComponentsInternal");
+
+        // Create the shadow copy backup component (VSSBackupComponent)
+        CreateVssBackupComponentsInternal_I(&(this->pBackup));
 
 	// Check if the operation succeeded
 	if (this->result != S_OK)

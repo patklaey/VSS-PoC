@@ -12,12 +12,13 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = vss_simple
 TEMPLATE = app
 
-INCLUDEPATH += "C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Include"
-INCLUDEPATH += "C:\\Program Files\\Microsoft Visual Studio 12.0\\VC\\include"
+INCLUDEPATH += "/home/sst-admin/bin/inc/win2003/"
 
-win32: LIBS += -lvssapi
+QMAKE_CXXFLAGS += -std=c++11 -w
 
-win32: LIBS += -lvss_uuid
+win32: LIBS += -lvssapi -lole32 -luuid
+
+#win32: LIBS += -lvss_uuid
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -30,7 +31,3 @@ HEADERS  += mainwindow.h \
     error.h
 
 FORMS    += mainwindow.ui
-
-
-
-
