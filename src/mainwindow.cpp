@@ -53,10 +53,6 @@ void MainWindow::backup()
     msgBox.setDefaultButton(QMessageBox::Ok);
     int ret = msgBox.exec();
 
-    if ( ret == QDialog::Accepted )
-    {
-
-    }
 }
 
 MainWindow::~MainWindow()
