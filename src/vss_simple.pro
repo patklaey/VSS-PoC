@@ -16,10 +16,10 @@ TEMPLATE = app
 
 #QMAKE_CXXFLAGS += -std=c++11 -w 
 
-#win32 {
-#QMAKE_LFLAGS += -static-libgcc -static-libstdc++
+win32 {
+QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 #LIBS += -lvssapi -lole32 -luuid 
-#} 
+} 
 
 SOURCES += main.cpp\
         mainwindow.cpp \
