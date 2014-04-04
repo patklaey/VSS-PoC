@@ -29,6 +29,11 @@ shadow_copy::shadow_copy(bool _debug)
 int shadow_copy::initializeSnapshot()
 {
 	// Initialize the backup
+        if ( this->pBackup == NULL )
+        {
+                return CANNOT_INITIALIZE_BACKUP;
+        }
+
 	this->result = this->pBackup->InitializeForBackup();
 
 	// Check if the operation succeeded

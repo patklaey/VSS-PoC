@@ -60,7 +60,9 @@ void MainWindow::backup()
         shadow_copy* vss = new shadow_copy(true);
         int result = vss->initializeSnapshot();
         QMessageBox msg;
-        msg.setText("Reurn value of initialize backup is: " + result );
+        QString string = "Return value of initialize snapshot: ";
+        string.append(QString("%1").arg(result));
+        msg.setText( string );
         msg.setInformativeText("Just because....");
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setDefaultButton(QMessageBox::Ok);
