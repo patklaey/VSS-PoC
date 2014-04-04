@@ -58,15 +58,53 @@ void MainWindow::backup()
     {
         // Initialize the backup
         shadow_copy* vss = new shadow_copy(true);
-        int result = vss->initializeSnapshot();
+        if ( vss->initializeSnapshot() != SUCCESS )
+        {
+            QMessageBox msg;
+            msg.setText(  "ERROR" );
+            msg.setInformativeText("Initializing Backup failed");
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setDefaultButton(QMessageBox::Ok);
+            msg.exec();
+            return;
+        }
+
+        // Add the partition tho the backup
+        foreach (name, partitions)
+        {
+            if (vss->addPartitionToSnapshot(name) != SUCCESS )
+            {
+                QMessageBox msg;
+                msg.setText(  "ERROR" );
+                msg.setInformativeText("Adding partition " + name + " to snapshot set failed");
+                msg.setStandardButtons(QMessageBox::Ok);
+                msg.setDefaultButton(QMessageBox::Ok);
+                msg.exec();
+                return;
+            }
+        }
+
+        if (vss->createSnapshot() != SUCCESS)
+        {
+            QMessageBox msg;
+            msg.setText(  "ERROR" );
+            msg.setInformativeText("Creating Backup failed");
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setDefaultButton(QMessageBox::Ok);
+            msg.exec();
+            return;
+        }
+
         QMessageBox msg;
-        QString string = "Return value of initialize snapshot: ";
-        string.append(QString("%1").arg(result));
-        msg.setText( string );
-        msg.setInformativeText("Just because....");
+        msg.setText(  "SUCCESS" );
+        msg.setInformativeText("Backup Successfully Created!");
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
+        return;
+
+        delete vss;
+
     }
 
 }
