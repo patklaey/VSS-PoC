@@ -24,11 +24,11 @@ QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 SOURCES += main.cpp\
         mainwindow.cpp \
     counter.cpp \
-#    shadow_copy.cpp
+    shadow_copy.cpp
 
 HEADERS  += mainwindow.h \
     counter.h \
-#    shadow_copy.h \
+    shadow_copy.h \
     error.h
 
 FORMS    += mainwindow.ui

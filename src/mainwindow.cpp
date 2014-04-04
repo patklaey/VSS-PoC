@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QVector>
 #include "counter.h"
+#include "shadow_copy.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -52,6 +53,19 @@ void MainWindow::backup()
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Ok);
     int ret = msgBox.exec();
+
+    if ( ret == QMessageBox::Ok )
+    {
+        // Initialize the backup
+        shadow_copy* vss = new shadow_copy(true);
+        int result = vss->initializeSnapshot();
+        QMessageBox msg;
+        msg.setText("Reurn value of initialize backup is: " + result );
+        msg.setInformativeText("Just because....");
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setDefaultButton(QMessageBox::Ok);
+        msg.exec();
+    }
 
 }
 
