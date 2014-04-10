@@ -73,7 +73,8 @@ void MainWindow::backup()
         foreach (name, partitions)
         {
             // Convert the QString name to a wchar*
-            wstring partition = name.toStdWString();
+            wchar_t partition[name.length()];
+            name.toWCharArray(partition);
 
             // Add the partition to the snapshot set
             if (vss->addPartitionToSnapshot(partition) != SUCCESS )
