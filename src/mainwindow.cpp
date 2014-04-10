@@ -4,6 +4,7 @@
 #include <QVector>
 #include "counter.h"
 #include "shadow_copy.h"
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -66,6 +67,7 @@ void MainWindow::backup()
             msg.setStandardButtons(QMessageBox::Ok);
             msg.setDefaultButton(QMessageBox::Ok);
             msg.exec();
+            delete vss;
             return;
         }
 
@@ -73,7 +75,7 @@ void MainWindow::backup()
         foreach (name, partitions)
         {
             // Convert the QString name to a wchar*
-            wchar_t partition[name.length()];
+            WCHAR partition[4] = {0}; 
             name.toWCharArray(partition);
 
             // Add the partition to the snapshot set
@@ -85,6 +87,7 @@ void MainWindow::backup()
                 msg.setStandardButtons(QMessageBox::Ok);
                 msg.setDefaultButton(QMessageBox::Ok);
                 msg.exec();
+                delete vss;
                 return;
             }
         }
@@ -97,6 +100,7 @@ void MainWindow::backup()
             msg.setStandardButtons(QMessageBox::Ok);
             msg.setDefaultButton(QMessageBox::Ok);
             msg.exec();
+            delete vss;
             return;
         }
 

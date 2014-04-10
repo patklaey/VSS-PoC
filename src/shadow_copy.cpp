@@ -8,7 +8,7 @@ shadow_copy::shadow_copy(bool _debug)
 	// Set the debug variable
 	this->debug = _debug;
 
-    (CoInitialize(NULL);
+    CoInitialize(NULL);
 
     // Load the vssapi library
     this->vssapiBase = LoadLibrary(L"vssapi.dll");
