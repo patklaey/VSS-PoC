@@ -14,6 +14,8 @@ TEMPLATE = app
 
 INCLUDEPATH += "/home/sst-admin/bin/inc/win2003/"
 
+CONFIG += console
+
 QMAKE_CXXFLAGS += -std=c++11 -w 
 
 win32 {

@@ -25,7 +25,7 @@ shadow_copy::shadow_copy(bool _debug)
 	// Check if the operation succeeded
 	if (this->result != S_OK)
     {
-        QString error = QString("Cannot create VSSBackupComponent, operation failed with error: 0x%08lx\n").arg(this->result);
+        QString error = QString("Cannot create VSSBackupComponent, operation failed with error: 0x%08lx").arg(this->result);
         qCritical(); << error;
     }
 
@@ -36,7 +36,7 @@ int shadow_copy::initializeSnapshot()
 	// Initialize the backup
     if ( this->pBackup == NULL )
     {
-        QString error = QString("Cannot initialize backup, VSSBackupComponent is null\n");
+        QString error = QString("Cannot initialize backup, VSSBackupComponent is null");
         qCritical() << error;
         return CANNOT_INITIALIZE_BACKUP;
     }
@@ -46,7 +46,7 @@ int shadow_copy::initializeSnapshot()
 	// Check if the operation succeeded
 	if (this->result != S_OK)
 	{
-        QString error = QString("Initialize for backup failed with error: = 0x%08lx\n").arg(this->result);
+        QString error = QString("Initialize for backup failed with error: = 0x%08lx").arg(this->result);
         qCritical() << error;
 		return CANNOT_INITIALIZE_BACKUP;
 	}
@@ -57,7 +57,7 @@ int shadow_copy::initializeSnapshot()
 	// Check if the operation succeeded
 	if (this->result != S_OK)
 	{
-        QString error = QString("Setting backup context to %i failed with error: 0x%08lx\n").arg(this->SC_SNAPSHOT_CONTEXT).arg(this->result);
+        QString error = QString("Setting backup context to %i failed with error: 0x%08lx").arg(this->SC_SNAPSHOT_CONTEXT).arg(this->result);
         qCritical() << error;
 		return CANNOT_SET_BACKUP_CONTEXT;
 	}
@@ -68,7 +68,7 @@ int shadow_copy::initializeSnapshot()
 	// Check if the operation succeeded
 	if (this->result != S_OK)
 	{
-        QString error = QString("Writers gathering metadata failed with error: 0x%08lx\n").arg(this->result);
+        QString error = QString("Writers gathering metadata failed with error: 0x%08lx").arg(this->result);
         qCritical() << error;
 		return WRITER_GATHERING_METADATA_FAILED;
 	}
@@ -79,7 +79,7 @@ int shadow_copy::initializeSnapshot()
 	// Check if the operation succeeded
 	if (this->result != S_OK)
 	{
-        QString error = QString("Waiting for writers collecting metadata failed with error: 0x%08lx\n").arg(this->result);
+        QString error = QString("Waiting for writers collecting metadata failed with error: 0x%08lx").arg(this->result);
         qCritical() << error;
 		return ASYNC_WAIT_FAILED;
 	}
@@ -92,7 +92,7 @@ int shadow_copy::initializeSnapshot()
 	// Check if the operation succeeded
 	if (this->result != S_OK)
 	{
-        QString error = QString("Strating snapshot set failed with error: 0x%08lx\n").arg(this->result);
+        QString error = QString("Strating snapshot set failed with error: 0x%08lx").arg(this->result);
         qCritical() << error;
 		return CANNOT_START_SNAPSHOT_SET;
 	}
