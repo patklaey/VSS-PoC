@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "shadow_copy.h"
+#include <QString>
+#include <QDebug>
 
 shadow_copy::shadow_copy(bool _debug)
 {
@@ -24,7 +26,7 @@ shadow_copy::shadow_copy(bool _debug)
 	if (this->result != S_OK)
     {
         QString error = QString("Cannot create VSSBackupComponent, operation failed with error: 0x%08lx\n").arg(this->result);
-        qDebug() << error;
+        qCritical(); << error;
     }
 
 }
@@ -35,7 +37,7 @@ int shadow_copy::initializeSnapshot()
     if ( this->pBackup == NULL )
     {
         QString error = QString("Cannot initialize backup, VSSBackupComponent is null\n");
-        qDebug() << error;
+        qCritical() << error;
         return CANNOT_INITIALIZE_BACKUP;
     }
 
@@ -45,7 +47,7 @@ int shadow_copy::initializeSnapshot()
 	if (this->result != S_OK)
 	{
         QString error = QString("Initialize for backup failed with error: = 0x%08lx\n").arg(this->result);
-        qDebug() << error;
+        qCritical() << error;
 		return CANNOT_INITIALIZE_BACKUP;
 	}
 
@@ -56,7 +58,7 @@ int shadow_copy::initializeSnapshot()
 	if (this->result != S_OK)
 	{
         QString error = QString("Setting backup context to %i failed with error: 0x%08lx\n").arg(this->SC_SNAPSHOT_CONTEXT).arg(this->result);
-        qDebug() << error;
+        qCritical() << error;
 		return CANNOT_SET_BACKUP_CONTEXT;
 	}
 
@@ -67,7 +69,7 @@ int shadow_copy::initializeSnapshot()
 	if (this->result != S_OK)
 	{
         QString error = QString("Writers gathering metadata failed with error: 0x%08lx\n").arg(this->result);
-        qDebug() << error;
+        qCritical() << error;
 		return WRITER_GATHERING_METADATA_FAILED;
 	}
 
@@ -78,7 +80,7 @@ int shadow_copy::initializeSnapshot()
 	if (this->result != S_OK)
 	{
         QString error = QString("Waiting for writers collecting metadata failed with error: 0x%08lx\n").arg(this->result);
-        qDebug() << error;
+        qCritical() << error;
 		return ASYNC_WAIT_FAILED;
 	}
 
@@ -91,7 +93,7 @@ int shadow_copy::initializeSnapshot()
 	if (this->result != S_OK)
 	{
         QString error = QString("Strating snapshot set failed with error: 0x%08lx\n").arg(this->result);
-        qDebug() << error;
+        qCritical() << error;
 		return CANNOT_START_SNAPSHOT_SET;
 	}
 
