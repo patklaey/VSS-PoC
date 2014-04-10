@@ -8,25 +8,22 @@ shadow_copy::shadow_copy(bool _debug)
 	// Set the debug variable
 	this->debug = _debug;
 
-	if (CoInitialize(NULL) != S_OK)
-	{
-		_tprintf(_T("CoInitialize failed!\n"));
-	}
+    (CoInitialize(NULL);
 
-        // Load the vssapi library
-        this->vssapiBase = LoadLibrary(L"vssapi.dll");
+    // Load the vssapi library
+    this->vssapiBase = LoadLibrary(L"vssapi.dll");
 
-        // Get the
-        CreateVssBackupComponentsInternal_I = (_CreateVssBackupComponentsInternal)GetProcAddress(this->vssapiBase, "CreateVssBackupComponentsInternal");
+    // Get the
+    CreateVssBackupComponentsInternal_I = (_CreateVssBackupComponentsInternal)GetProcAddress(this->vssapiBase, "CreateVssBackupComponentsInternal");
 
-        // Create the shadow copy backup component (VSSBackupComponent)
-        CreateVssBackupComponentsInternal_I(&(this->pBackup));
+    // Create the shadow copy backup component (VSSBackupComponent)
+    this->result = CreateVssBackupComponentsInternal_I(&(this->pBackup));
 
 	// Check if the operation succeeded
 	if (this->result != S_OK)
     {
         QString error = QString("Cannot create VSSBackupComponent, operation failed with error: 0x%08lx").arg(this->result);
-        qCritical(); << error;
+        qCritical() << error;
     }
 
 }
