@@ -72,7 +72,11 @@ void MainWindow::backup()
         // Add the partition tho the backup
         foreach (name, partitions)
         {
-            if (vss->addPartitionToSnapshot(name) != SUCCESS )
+            // Convert the QString name to a wchar*
+            wstring partition = name.toStdWString();
+
+            // Add the partition to the snapshot set
+            if (vss->addPartitionToSnapshot(partition) != SUCCESS )
             {
                 QMessageBox msg;
                 msg.setText(  "ERROR" );
@@ -87,7 +91,7 @@ void MainWindow::backup()
         if (vss->createSnapshot() != SUCCESS)
         {
             QMessageBox msg;
-            msg.setText(  "ERROR" );
+            msg.setText( "ERROR" );
             msg.setInformativeText("Creating Backup failed");
             msg.setStandardButtons(QMessageBox::Ok);
             msg.setDefaultButton(QMessageBox::Ok);
