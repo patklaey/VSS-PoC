@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->snapshot->connect( this, SIGNAL( sendInitializeSnapshot() ), SLOT( initializeSnapshot() ) );
     this->snapshot->connect( this, SIGNAL( sendAddPartitionsToSnapshot( QVector<QString> ) ), SLOT( addPartitions( QVector<QString> ) ) );
     this->snapshot->connect( this, SIGNAL( sendCreateSnapshot() ), SLOT( doSnapshot() ) );
-    this->connect( this->snapshot, SIGNAL( sendSnapshotObjectCreated(int) ), SLOT( snapshotCreated(int) ) );
+    this->connect( this->snapshot, SIGNAL( sendSnapshotObjectCreated(int) ), SLOT( snapshotObjectCreated(int) ) );
     this->connect( this->snapshot, SIGNAL( sendSnapshotInitialized(int) ), SLOT( snapshotInitialized(int) ) );
     this->connect( this->snapshot, SIGNAL( sendPartitionAdded(int) ), SLOT( partitionsAddedToSnapshot(int) ) );
     this->connect( this->snapshot, SIGNAL( sendSnapshotExecuted(int) ), SLOT( snapshotCreated(int) ) );
