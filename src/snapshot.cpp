@@ -1,12 +1,12 @@
 #include "snapshot.h"
 
-snapshot::snapshot(QObject *parent) :
+Snapshot::Snapshot(QObject *parent) :
     QObject(parent)
 {
 
 }
 
-void snapshot::createSnapshotObject()
+void Snapshot::createSnapshotObject()
 {
     // Create a new concrete snapshot object
     this->vss = new shadow_copy(true);
@@ -21,13 +21,13 @@ void snapshot::createSnapshotObject()
     }
 }
 
-void snapshot::initializeSnapshot()
+void Snapshot::initializeSnapshot()
 {
     // Initialize the backup and send back the result
     emit sendSnapshotInitialized(this->vss->initializeSnapshot());
 }
 
-void snapshot::addPartitions(QVector<QString> partitions)
+void Snapshot::addPartitions(QVector<QString> partitions)
 {
     int result = 0;
     QString name;
@@ -44,7 +44,7 @@ void snapshot::addPartitions(QVector<QString> partitions)
     emit sendPartitionAdded( result );
 }
 
-void snapshot::doSnapshot()
+void Snapshot::doSnapshot()
 {
     // Return the result of the snapshot creation
     emit sendSnapshotExecuted( this->vss->createSnapshot() );

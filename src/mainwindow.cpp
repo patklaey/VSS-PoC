@@ -15,6 +15,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->quit_button, SIGNAL(clicked()), this, SLOT(quit()));
     connect(ui->backup_button, SIGNAL(clicked()), this, SLOT(backup()));
 
+    // Create the snapshot and the snashot_thread obejct
+    this->snapshot = new Snapshot();
+    this->snapshot_thread = new QThread();
+
+    // Initialize the snapshot and move it to a new thread
+    this->snapshot->connect( this->snapshot_thread, SIGNAL(started()), SLOT(createSnapshotObject()));
+    this->snapshot->moveToThread( this->snapshot_thread );
+
+    // Connect the slots and signals
+    this->snapshot->connect( this, SIGNAL( sendInitializeSnapshot() ), SLOT( initializeSnapshot() ) );
+    this->snapshot->connect( this, SIGNAL( sendAddPartitionsToSnapshot( QVector<QString> ) ), SLOT( addPartitions( QVector<QString> ) ) );
+    this->snapshot->connect( this, SIGNAL( sendCreateSnapshot() ), SLOT( doSnapshot() ) );
+    this->connect( this->snapshot, SIGNAL( sendSnapshotObjectCreated(int) ), SLOT( snapshotCreated(int) ) );
+    this->connect( this->snapshot, SIGNAL( sendSnapshotInitialized(int) ), SLOT( snapshotInitialized(int) ) );
+    this->connect( this->snapshot, SIGNAL( sendPartitionAdded(int) ), SLOT( partitionsAddedToSnapshot(int) ) );
+    this->connect( this->snapshot, SIGNAL( sendSnapshotExecuted(int) ), SLOT( snapshotCreated(int) ) );
+
     counter* count = new counter(ui->counter);
     count->start();
 }
@@ -60,24 +77,9 @@ void MainWindow::backup()
 
     if ( ret == QMessageBox::Ok )
     {
-        // Initialize the snapshot and move it to a new thread
-        QThread snapshot_thread;
-        snapshot snapshot;
-        snapshot.connect(&snapshot_thread, SIGNAL(started()), SLOT(createSnapshotObject()));
-        snapshot.moveToThread(&snapshot_thread);
-
-        // Connect the slots and signals
-        snapshot.connect( this, SIGNAL( sendInitializeSnapshot() ), SLOT( initializeSnapshot() ) );
-        snapshot.connect( this, SIGNAL( sendAddPartitionsToSnapshot( QVector<QString> ) ), SLOT( addPartitions( QVector<QString> ) ) );
-        snapshot.connect( this, SIGNAL( sendCreateSnapshot() ), SLOT( doSnapshot() ) );
-        this->connect( &snapshot, SIGNAL( sendSnapshotObjectCreated(int) ), SLOT( snapshotCreated(int) ) );
-        this->connect( &snapshot, SIGNAL( sendSnapshotInitialized(int) ), SLOT( snapshotInitialized(int) ) );
-        this->connect( &snapshot, SIGNAL( sendPartitionAdded(int) ), SLOT( partitionsAddedToSnapshot(int) ) );
-        this->connect( &snapshot, SIGNAL( sendSnapshotExecuted(int) ), SLOT( snapshotCreated(int) ) );
-
         // Start the snapshot thread
         qDebug() << "Starting snapshot thread" ;
-        snapshot_thread.start();
+        this->snapshot_thread->start();
     }
 
 }

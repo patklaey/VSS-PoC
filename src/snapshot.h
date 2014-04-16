@@ -6,13 +6,13 @@
 #include <QVector>
 #include "shadow_copy.h"
 
-class snapshot : public QObject
+class Snapshot : public QObject
 {
     Q_OBJECT
     shadow_copy *vss;
 
 public:
-    explicit snapshot(QObject *parent = 0);
+    explicit Snapshot(QObject *parent = 0);
 
 signals:
     void sendSnapshotObjectCreated(int result);

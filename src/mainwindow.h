@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "snapshot.h"
+#include <QThread>
 
 namespace Ui {
 class MainWindow;
@@ -33,6 +35,8 @@ protected slots:
 private:
     Ui::MainWindow *ui;
     QVector<QString> partitions;
+    QThread* snapshot_thread;
+    Snapshot* snapshot;
 
 };
 
