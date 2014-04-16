@@ -19,13 +19,16 @@ MainWindow::MainWindow(QWidget *parent) :
     this->snapshot = new Snapshot();
     this->snapshot_thread = new QThread();
 
+    // Register the stringVector (QVector<QString>)
+    qRegisterMetaType<stringVector>("stringVector");
+
     // Initialize the snapshot and move it to a new thread
     this->snapshot->connect( this->snapshot_thread, SIGNAL(started()), SLOT(createSnapshotObject()));
     this->snapshot->moveToThread( this->snapshot_thread );
 
     // Connect the slots and signals
     this->snapshot->connect( this, SIGNAL( sendInitializeSnapshot() ), SLOT( initializeSnapshot() ) );
-    this->snapshot->connect( this, SIGNAL( sendAddPartitionsToSnapshot( QVector<QString> ) ), SLOT( addPartitions( QVector<QString> ) ) );
+    this->snapshot->connect( this, SIGNAL( sendAddPartitionsToSnapshot( stringVector ) ), SLOT( addPartitions( stringVector ) ) );
     this->snapshot->connect( this, SIGNAL( sendCreateSnapshot() ), SLOT( doSnapshot() ) );
     this->connect( this->snapshot, SIGNAL( sendSnapshotObjectCreated(int) ), SLOT( snapshotObjectCreated(int) ) );
     this->connect( this->snapshot, SIGNAL( sendSnapshotInitialized(int) ), SLOT( snapshotInitialized(int) ) );

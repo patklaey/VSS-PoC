@@ -5,6 +5,8 @@
 #include "snapshot.h"
 #include <QThread>
 
+typedef QVector<QString> stringVector;
+
 namespace Ui {
 class MainWindow;
 }
@@ -25,7 +27,7 @@ public slots:
 
 signals:
     void sendInitializeSnapshot();
-    void sendAddPartitionsToSnapshot( QVector<QString> partitions );
+    void sendAddPartitionsToSnapshot( stringVector partitions );
     void sendCreateSnapshot();
 
 protected slots:
