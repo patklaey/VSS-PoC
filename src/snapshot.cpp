@@ -48,4 +48,7 @@ void Snapshot::doSnapshot()
 {
     // Return the result of the snapshot creation
     emit sendSnapshotExecuted( this->vss->createSnapshot() );
+
+    // And clean up
+    delete this->vss;
 }
