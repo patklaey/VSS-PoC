@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->connect( this->snapshot, SIGNAL( sendSnapshotInitialized(int) ), SLOT( snapshotInitialized(int) ) );
     this->connect( this->snapshot, SIGNAL( sendPartitionAdded(int) ), SLOT( partitionsAddedToSnapshot(int) ) );
     this->connect( this->snapshot, SIGNAL( sendSnapshotExecuted(int) ), SLOT( snapshotCreated(int) ) );
+    this->snapshot_thread->start();
 
     counter* count = new counter(ui->counter);
     count->start();
@@ -80,9 +81,9 @@ void MainWindow::backup()
 
     if ( ret == QMessageBox::Ok )
     {
-        // Start the snapshot thread
-        qDebug() << "Starting snapshot thread" ;
-        this->snapshot_thread->start();
+        // Let the snapshot thread work
+        qDebug() << "Creating snapshot" ;
+        emit sendInitializeSnapshot();
     }
 
 }
@@ -97,10 +98,6 @@ void MainWindow::snapshotObjectCreated(int result)
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
-    } else
-    {
-        qDebug() << "Successfully created backup object, going to initialize snapshot" ;
-        emit sendInitializeSnapshot();
     }
 }
 
