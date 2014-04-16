@@ -27,7 +27,7 @@ void Snapshot::initializeSnapshot()
     emit sendSnapshotInitialized(this->vss->initializeSnapshot());
 }
 
-void Snapshot::addPartitions(QVector<QString> partitions)
+void Snapshot::addPartitions(stringVector partitions)
 {
     int result = 0;
     QString name;

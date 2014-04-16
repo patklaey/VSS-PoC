@@ -6,6 +6,8 @@
 #include <QVector>
 #include "shadow_copy.h"
 
+typedef QVector<QString> stringVector;
+
 class Snapshot : public QObject
 {
     Q_OBJECT
@@ -23,7 +25,7 @@ signals:
 public slots:
     void createSnapshotObject();
     void initializeSnapshot();
-    void addPartitions(QVector<QString> partitions);
+    void addPartitions( stringVector partitions);
     void doSnapshot();
 };
 

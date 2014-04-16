@@ -5,8 +5,6 @@
 #include "snapshot.h"
 #include <QThread>
 
-typedef QVector<QString> stringVector;
-
 namespace Ui {
 class MainWindow;
 }
