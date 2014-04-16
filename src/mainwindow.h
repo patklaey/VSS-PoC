@@ -24,6 +24,7 @@ public slots:
     void snapshotCreated( int result );
 
 signals:
+    void sendCreateSnapshotObject();
     void sendInitializeSnapshot();
     void sendAddPartitionsToSnapshot( stringVector partitions );
     void sendCreateSnapshot();

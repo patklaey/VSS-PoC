@@ -23,10 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
     qRegisterMetaType<stringVector>("stringVector");
 
     // Initialize the snapshot and move it to a new thread
-    this->snapshot->connect( this->snapshot_thread, SIGNAL(started()), SLOT(createSnapshotObject()));
     this->snapshot->moveToThread( this->snapshot_thread );
 
     // Connect the slots and signals
+    this->snapshot->connect( this, SIGNAL( sendCreateSnapshotObject() ), SLOT(createSnapshotObject()));
     this->snapshot->connect( this, SIGNAL( sendInitializeSnapshot() ), SLOT( initializeSnapshot() ) );
     this->snapshot->connect( this, SIGNAL( sendAddPartitionsToSnapshot( stringVector ) ), SLOT( addPartitions( stringVector ) ) );
     this->snapshot->connect( this, SIGNAL( sendCreateSnapshot() ), SLOT( doSnapshot() ) );
@@ -83,7 +83,7 @@ void MainWindow::backup()
     {
         // Let the snapshot thread work
         qDebug() << "Creating snapshot" ;
-        emit sendInitializeSnapshot();
+        emit sendCreateSnapshotObject();
     }
 
 }
@@ -98,6 +98,10 @@ void MainWindow::snapshotObjectCreated(int result)
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
+    } else
+    {
+        // OK initialize the snapshot
+        emit sendInitializeSnapshot();
     }
 }
 
