@@ -15,12 +15,25 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void snapshotObjectCreated( int result );
+    void snapshotInitialized( int result );
+    void partitionsAddedToSnapshot( int result );
+    void snapshotCreated( int result );
+
+signals:
+    void sendInitializeSnapshot();
+    void sendAddPartitionsToSnapshot( QVector<QString> partitions );
+    void sendCreateSnapshot();
+
 protected slots:
     void quit();
     void backup();
 
 private:
     Ui::MainWindow *ui;
+    QVector<QString> partitions;
+
 };
 
 #endif // MAINWINDOW_H

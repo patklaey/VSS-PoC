@@ -3,8 +3,9 @@
 #include <QMessageBox>
 #include <QVector>
 #include "counter.h"
-#include "shadow_copy.h"
 #include <QDebug>
+#include <QThread>
+#include "snapshot.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,17 +27,19 @@ void MainWindow::quit()
 void MainWindow::backup()
 {
 
-    QVector<QString> partitions;
     QMessageBox msgBox;
+
+    // Clear the partitions
+    this->partitions.clear();
 
     // Check which checkboxes are checked
     if ( this->ui->c_checkbox->isChecked() )
-        partitions.append("C:\\");
+        this->partitions.append("C:\\");
 
     if ( this->ui->e_checkbox->isChecked() )
-        partitions.append("E:\\");
+        this->partitions.append("E:\\");
 
-    if ( partitions.size() == 0 )
+    if ( this->partitions.size() == 0 )
     {
         msgBox.critical(0,"No partition selected","Please select at least one partition to backup",QMessageBox::Ok);
         return;
@@ -57,63 +60,95 @@ void MainWindow::backup()
 
     if ( ret == QMessageBox::Ok )
     {
-        // Initialize the backup
-        shadow_copy* vss = new shadow_copy(true);
-        if ( vss->initializeSnapshot() != SUCCESS )
-        {
-            QMessageBox msg;
-            msg.setText(  "ERROR" );
-            msg.setInformativeText("Initializing Backup failed");
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.setDefaultButton(QMessageBox::Ok);
-            msg.exec();
-            delete vss;
-            return;
-        }
+        // Initialize the snapshot and move it to a new thread
+        QThread snapshot_thread;
+        snapshot snapshot;
+        snapshot.connect(&snapshot_thread, SIGNAL(started()), SLOT(createSnapshotObject()));
+        snapshot.moveToThread(&snapshot_thread);
 
-        // Add the partition tho the backup
-        foreach (name, partitions)
-        {
-            // Convert the QString name to a wchar*
-            WCHAR partition[4] = {0}; 
-            name.toWCharArray(partition);
+        // Connect the slots and signals
+        snapshot.connect( this, SIGNAL( sendInitializeSnapshot() ), SLOT( initializeSnapshot() ) );
+        snapshot.connect( this, SIGNAL( sendAddPartitionsToSnapshot( QVector<QString> ) ), SLOT( addPartitions( QVector<QString> ) ) );
+        snapshot.connect( this, SIGNAL( sendCreateSnapshot() ), SLOT( doSnapsot() ) );
+        this->connect( &snapshot, SIGNAL( sendSnapshotObjectCreated(int) ), SLOT( snapshotCreated(int) ) );
+        this->connect( &snapshot, SIGNAL( sendSnapshotInitialized(int) ), SLOT( snapshotInitialized(int) ) );
+        this->connect( &snapshot, SIGNAL( sendPartitionAdded(int) ), SLOT( partitionsAddedToSnapshot(int) ) );
+        this->connect( &snapshot, SIGNAL( sendSnapshotExecuted(int) ), SLOT( snapshotCreated(int) ) );
 
-            // Add the partition to the snapshot set
-            if (vss->addPartitionToSnapshot(partition) != SUCCESS )
-            {
-                QMessageBox msg;
-                msg.setText(  "ERROR" );
-                msg.setInformativeText("Adding partition " + name + " to snapshot set failed");
-                msg.setStandardButtons(QMessageBox::Ok);
-                msg.setDefaultButton(QMessageBox::Ok);
-                msg.exec();
-                delete vss;
-                return;
-            }
-        }
+        // Start the snapshot thread
+        snapshot_thread.start();
+    }
 
-        if (vss->createSnapshot() != SUCCESS)
-        {
-            QMessageBox msg;
-            msg.setText( "ERROR" );
-            msg.setInformativeText("Creating Backup failed");
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.setDefaultButton(QMessageBox::Ok);
-            msg.exec();
-            delete vss;
-            return;
-        }
+}
 
+MainWindow::snapshotObjectCreated(int result)
+{
+    if ( result != SUCCESS )
+    {
+        QMessageBox msg;
+        msg.setText(  "ERROR" );
+        msg.setInformativeText("Creating Snapshot Object failed");
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setDefaultButton(QMessageBox::Ok);
+        msg.exec();
+    } else
+    {
+        emit sendInitializeSnapshot();
+    }
+}
+
+MainWindow::snapshotInitialized(int result)
+{
+    if ( result != SUCCESS )
+    {
+        QMessageBox msg;
+        msg.setText(  "ERROR" );
+        msg.setInformativeText("Initializing Backup failed");
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setDefaultButton(QMessageBox::Ok);
+        msg.exec();
+    } else
+    {
+        // Add the partitions to the snapshot
+        emit sendAddPartitionsToSnapshot( this->partitions );
+    }
+}
+
+MainWindow::partitionsAddedToSnapshot( int result )
+{
+    if ( result != SUCCESS )
+    {
+        QMessageBox msg;
+        msg.setText(  "ERROR" );
+        msg.setInformativeText("Adding partitions to snapshot set failed");
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setDefaultButton(QMessageBox::Ok);
+        msg.exec();
+    } else
+    {
+        // Execute the snapshot
+        emit sendCreateSnapshot();
+    }
+}
+
+MainWindow::snapshotCreated(int result)
+{
+    if ( result != SUCCESS )
+    {
+        QMessageBox msg;
+        msg.setText( "ERROR" );
+        msg.setInformativeText("Creating Backup failed");
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setDefaultButton(QMessageBox::Ok);
+        msg.exec();
+    } else
+    {
         QMessageBox msg;
         msg.setText(  "SUCCESS" );
         msg.setInformativeText("Backup Successfully Created!");
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setDefaultButton(QMessageBox::Ok);
         msg.exec();
-        return;
-
-        delete vss;
-
     }
 
 }

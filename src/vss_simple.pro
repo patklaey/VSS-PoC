@@ -26,11 +26,13 @@ LIBS += -lvssapi -lole32 -luuid
 SOURCES += main.cpp\
         mainwindow.cpp \
     counter.cpp \
-    shadow_copy.cpp
+    shadow_copy.cpp \
+    snapshot.cpp
 
 HEADERS  += mainwindow.h \
     counter.h \
     shadow_copy.h \
-    error.h
+    error.h \
+    snapshot.h
 
 FORMS    += mainwindow.ui
