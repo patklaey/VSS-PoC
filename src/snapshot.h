@@ -25,7 +25,6 @@ public slots:
     void initializeSnapshot();
     void addPartitions(QVector<QString> partitions);
     void doSnapshot();
-
 };
 
 #endif // SNAPSHOT_H

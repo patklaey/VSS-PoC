@@ -69,13 +69,14 @@ void MainWindow::backup()
         // Connect the slots and signals
         snapshot.connect( this, SIGNAL( sendInitializeSnapshot() ), SLOT( initializeSnapshot() ) );
         snapshot.connect( this, SIGNAL( sendAddPartitionsToSnapshot( QVector<QString> ) ), SLOT( addPartitions( QVector<QString> ) ) );
-        snapshot.connect( this, SIGNAL( sendCreateSnapshot() ), SLOT( doSnapsot() ) );
+        snapshot.connect( this, SIGNAL( sendCreateSnapshot() ), SLOT( doSnapshot() ) );
         this->connect( &snapshot, SIGNAL( sendSnapshotObjectCreated(int) ), SLOT( snapshotCreated(int) ) );
         this->connect( &snapshot, SIGNAL( sendSnapshotInitialized(int) ), SLOT( snapshotInitialized(int) ) );
         this->connect( &snapshot, SIGNAL( sendPartitionAdded(int) ), SLOT( partitionsAddedToSnapshot(int) ) );
         this->connect( &snapshot, SIGNAL( sendSnapshotExecuted(int) ), SLOT( snapshotCreated(int) ) );
 
         // Start the snapshot thread
+        qDebug() << "Starting snapshot thread" ;
         snapshot_thread.start();
     }
 
@@ -93,6 +94,7 @@ void MainWindow::snapshotObjectCreated(int result)
         msg.exec();
     } else
     {
+        qDebug() << "Successfully created backup object, going to initialize snapshot" ;
         emit sendInitializeSnapshot();
     }
 }
@@ -110,6 +112,7 @@ void MainWindow::snapshotInitialized(int result)
     } else
     {
         // Add the partitions to the snapshot
+        qDebug() << "Successfully initialized backup, going to add partitions" ;
         emit sendAddPartitionsToSnapshot( this->partitions );
     }
 }
@@ -127,6 +130,7 @@ void MainWindow::partitionsAddedToSnapshot( int result )
     } else
     {
         // Execute the snapshot
+        qDebug() << " Successfully added partitions to snapshot set, going to create snapshot" ;
         emit sendCreateSnapshot();
     }
 }
