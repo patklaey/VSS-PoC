@@ -30,6 +30,7 @@ void snapshot::initializeSnapshot()
 void snapshot::addPartitions(QVector<QString> partitions)
 {
     int result = 0;
+    QString name;
     foreach ( name, partitions)
     {
         // Convert the given partition to a WCHAR

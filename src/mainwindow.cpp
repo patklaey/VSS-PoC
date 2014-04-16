@@ -81,7 +81,7 @@ void MainWindow::backup()
 
 }
 
-MainWindow::snapshotObjectCreated(int result)
+void MainWindow::snapshotObjectCreated(int result)
 {
     if ( result != SUCCESS )
     {
@@ -97,7 +97,7 @@ MainWindow::snapshotObjectCreated(int result)
     }
 }
 
-MainWindow::snapshotInitialized(int result)
+void MainWindow::snapshotInitialized(int result)
 {
     if ( result != SUCCESS )
     {
@@ -114,7 +114,7 @@ MainWindow::snapshotInitialized(int result)
     }
 }
 
-MainWindow::partitionsAddedToSnapshot( int result )
+void MainWindow::partitionsAddedToSnapshot( int result )
 {
     if ( result != SUCCESS )
     {
@@ -131,7 +131,7 @@ MainWindow::partitionsAddedToSnapshot( int result )
     }
 }
 
-MainWindow::snapshotCreated(int result)
+void MainWindow::snapshotCreated(int result)
 {
     if ( result != SUCCESS )
     {
